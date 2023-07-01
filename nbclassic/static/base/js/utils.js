@@ -58,8 +58,13 @@ define([
      */
     var load_extensions = function () {
         console.log('load_extensions', arguments);
-        return Promise.all(Array.prototype.map.call(arguments, load_extension)).catch(function(err) {
-            console.error("Failed to load extension" + (err.requireModules.length>1?'s':'') + ":", err.requireModules, err);
+        return Promise.allSettled(Array.prototype.map.call(arguments, load_extension)).then(function(results) {
+            results.forEach(function(result) {
+              if (result.status === 'rejected') {
+                var err = result.reason;
+                console.error("Failed to load extension" + (err.requireModules.length>1?'s':'') + ":", err.requireModules, err);
+              }
+            });
         });
     };
 
